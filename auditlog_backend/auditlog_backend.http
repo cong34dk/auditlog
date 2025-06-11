@@ -1,0 +1,6 @@
+@auditlog_backend_HostAddress = http://localhost:5049
+
+GET {{auditlog_backend_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
