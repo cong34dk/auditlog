@@ -1,7 +1,6 @@
-<h3>Danh sách sản phẩm</h3>
+<h3>Danh sách Auditlog</h3>
 
-<div class="d-flex justify-content-between mb-3 align-items-center">
-  <button class="btn btn-success" (click)="goToCreate()">Thêm sản phẩm</button>
+<div class="d-flex justify-content-end mb-3 align-items-center">
 
   <div class="d-flex align-items-center gap-2">
     <label for="pageSizeSelect" class="form-label mb-0 me-2">Hiển thị:</label>
@@ -17,28 +16,44 @@
   </div>
 </div>
 
-  <div style="max-height: 350px; overflow-y: auto;">
-    <table class="table table-bordered table-hover mb-0">
-    <thead class="table-light sticky-top bg-white" style="top: 0; z-index: 10;">
+
+  <div class="scrollable-table-container">
+    <table class="table table-bordered table-hover sticky-header mb-0">
+    <thead>
       <tr>
         <th>STT</th>
-        <th>Tên</th>
-        <th>Giá</th>
-        <th>Mô tả</th>
-        <th>Ngày tạo</th>
+        <th>Người thực hiện</th>
         <th>Hành động</th>
+        <th>Bảng</th>
+        <th>Thời gian</th>
+        <th>Giá trị cũ</th>
+        <th>Giá trị mới</th>
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let p of products; let i = index">
+      <tr *ngFor="let obj of data; let i = index">
         <td>{{ (currentPage - 1) * pageSize + i + 1 }}</td>
-        <td>{{ p.name }}</td>
-        <td>{{ p.price }}</td>
-        <td>{{ p.description }}</td>
-        <td>{{ p.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+        <td>{{ obj.username }}</td>
+        <td>{{ obj.action }}</td>
+        <td>{{ obj.tableName }}</td>
+        <td>{{ obj.timestamp | date: 'dd/MM/yyyy HH:mm' }}</td>
+        <!-- Giá trị cũ -->
         <td>
-          <button class="btn btn-primary btn-sm" (click)="goToEdit(p.id)">Sửa</button>
-          <button class="btn btn-danger btn-sm" (click)="deleteProduct(p.id)">Xóa</button>
+          <div *ngFor="let key of objectKeys(obj.parsedOldValues || {})">
+            <strong>{{ key }}:</strong> {{ obj.parsedOldValues?.[key] }}
+          </div>
+        </td>
+        <!-- Giá trị mới -->
+        <td>
+          <div *ngFor="let key of objectKeys(obj.parsedNewValues || {})">
+            <strong>{{ key }}:</strong>
+            <span [ngClass]="{
+              'text-success': obj.parsedNewValues?.[key] !== obj.parsedOldValues?.[key],
+              'text-danger': obj.parsedNewValues?.[key] === obj.parsedOldValues?.[key]
+            }">
+              {{ obj.parsedNewValues?.[key] }}
+            </span>
+          </div>
         </td>
       </tr>
     </tbody>

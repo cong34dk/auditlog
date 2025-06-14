@@ -1,0 +1,35 @@
+<div class="container mt-5" style="max-width: 500px;">
+  <h3 class="mb-4">Đăng ký</h3>
+  <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+    <div class="mb-3">
+      <label for="username" class="form-label">Tên đăng nhập</label>
+      <input type="text" class="form-control" id="username" formControlName="username">
+      <div class="text-danger mt-1" *ngIf="registerForm.get('username')?.touched && registerForm.get('username')?.invalid">
+        Tên đăng nhập là bắt buộc
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label for="password" class="form-label">Mật khẩu</label>
+      <input type="password" class="form-control" id="password" formControlName="password">
+      <div class="text-danger mt-1" *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.invalid">
+        <span *ngIf="registerForm.get('password')?.errors?.['required']">Mật khẩu là bắt buộc</span>
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label for="confirmPassword" class="form-label">Xác nhận mật khẩu</label>
+      <input type="password" class="form-control" id="confirmPassword" formControlName="confirmPassword">
+      <div class="text-danger mt-1" *ngIf="registerForm.hasError('mismatch') && registerForm.get('confirmPassword')?.touched">
+        Mật khẩu xác nhận không khớp
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-success">Đăng ký</button>
+  </form>
+
+    <div class="text-center mt-3">
+    <span>Bạn đã có tài khoản?</span>
+    <button (click)="goToLogin()" class="btn btn-link">Đăng nhập ngay</button>
+    </div>
+</div>

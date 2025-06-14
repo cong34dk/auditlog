@@ -1,12 +1,12 @@
 ﻿using auditlog_backend.DTOs.Product;
 using auditlog_backend.Models;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Diagnostics;
 
 namespace auditlog_backend.Controllers
 {
+    [Authorize]
     [Route("api/product/[action]")]
     [ApiController]
     public class ProductController : ControllerBase

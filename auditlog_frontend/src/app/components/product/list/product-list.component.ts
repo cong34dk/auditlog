@@ -21,7 +21,7 @@ export class ProductListComponent implements OnInit {
   pageSize: number = 10;
   searchTerm: string = '';
   
-  constructor(private _productService: ProductService, private router: Router) {}
+  constructor(private _productService: ProductService, private _router: Router) {}
 
   ngOnInit(): void {
     this.loadProducts();
@@ -37,11 +37,11 @@ export class ProductListComponent implements OnInit {
   }
 
   goToCreate(): void {
-    this.router.navigate(['/create']);
+    this._router.navigate(['/create']);
   }
 
   goToEdit(id: number): void {
-    this.router.navigate(['/edit', id]);
+    this._router.navigate(['/edit', id]);
   }
 
   deleteProduct(id: number): void {
@@ -53,7 +53,8 @@ export class ProductListComponent implements OnInit {
   }
 
   changePage(page: number): void {
-    if (page > 1 && page <= this.totalPages) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
       this.loadProducts(page);
     }
   }

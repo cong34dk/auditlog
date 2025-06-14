@@ -1,0 +1,15 @@
+.scrollable-table-container {
+  max-height: 350px;
+  overflow-y: auto;
+}
+
+.sticky-header thead th {
+  position: sticky;
+  top: 0;
+  background-color: white;
+  z-index: 10;
+}
+
+.page-link {
+  cursor: pointer;
+}

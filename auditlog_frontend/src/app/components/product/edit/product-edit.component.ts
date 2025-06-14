@@ -40,16 +40,16 @@ export class ProductEditComponent implements OnInit {
   save(): void {
     if (this.isEditMode) {
       this._productService.update(this.id, this.model).subscribe(() => {
-        this._router.navigate(['/']);
+        this._router.navigate(['/list']);
       });
     } else {
       this._productService.create(this.model).subscribe(() => {
-        this._router.navigate(['/']);
+        this._router.navigate(['/list']);
       });
     }
   }
 
   goBack(): void {
-    this._router.navigate(['/']);
+    this._router.navigate(['/list']);
   }
 }

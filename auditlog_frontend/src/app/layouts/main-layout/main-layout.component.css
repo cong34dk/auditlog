@@ -1,0 +1,9 @@
+.navbar-nav .nav-link.active {
+  font-weight: bold;
+  color: #ffc107 !important;
+}
+
+.nav-link {
+    color: #ffffff;
+    cursor: pointer;
+}
