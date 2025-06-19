@@ -39,4 +39,12 @@ export class ProductService {
   deleteAll(): Observable<any> {
     return this.http.delete(`${this.apiUrl}/product/DeleteAll`);
   }
+
+  downloadTemplate(): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/product/DownloadTemplate`, {responseType: 'blob'});
+  }
+
+  importTemplate(formData: FormData): Observable<any> {
+    return this.http.post(`${this.apiUrl}/product/ImportTemplate`, formData);
+  }
 }

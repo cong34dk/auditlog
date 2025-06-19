@@ -1,7 +1,13 @@
 <h3>Danh sách sản phẩm</h3>
 
 <div class="d-flex justify-content-between mb-3 align-items-center">
-  <button class="btn btn-success" (click)="goToCreate()">Thêm sản phẩm</button>
+  <button class="btn btn-primary" (click)="goToCreate()">Thêm sản phẩm</button>
+  <button class="btn btn-success" (click)="exportExcel()">Xuất Excel</button>
+  <button class="btn btn-info" (click)="downloadTemplate()">Tải mẫu excel</button>
+  <form (submit)="onImportTemplate($event)">
+    <input type="file" (change)="onFileChange($event)" accept=".xlsx">
+    <button class="btn btn-warning">Nhập file Excel</button>
+  </form>
 
   <div class="d-flex align-items-center gap-2">
     <label for="pageSizeSelect" class="form-label mb-0 me-2">Hiển thị:</label>

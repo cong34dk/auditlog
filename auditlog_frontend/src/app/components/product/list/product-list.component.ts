@@ -4,6 +4,8 @@ import { Product } from '../../../models/product';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import * as XLSX from 'xlsx';
+import * as FileSaver from 'file-saver';
 
 @Component({
   selector: 'app-product-list',
@@ -20,6 +22,8 @@ export class ProductListComponent implements OnInit {
   totalRecord: number = 0;
   pageSize: number = 10;
   searchTerm: string = '';
+  
+  selectedFile: File | null = null;
   
   constructor(private _productService: ProductService, private _router: Router) {}
 
@@ -71,5 +75,56 @@ export class ProductListComponent implements OnInit {
   onPageSizeChange(): void {
     this.currentPage = 1;
     this.loadProducts();
+  }
+
+  downloadTemplate() {
+    this._productService.downloadTemplate().subscribe((blob) => {
+      const a = document.createElement('a');
+      const objectUrl = URL.createObjectURL(blob);
+      a.href = objectUrl;
+      a.download = 'ProductTemplate.xlsx';
+      a.click();
+      URL.revokeObjectURL(objectUrl);
+    })
+  }
+
+  onFileChange(event: any) {
+    this.selectedFile = event.target.files[0];
+  }
+
+  onImportTemplate(event: Event) {
+    event.preventDefault();
+    if (!this.selectedFile) return;
+
+    const formData = new FormData();
+    formData.append('file', this.selectedFile);
+
+    this._productService.importTemplate(formData).subscribe({
+      next: (res: any) => {
+        alert(`Đã nhập ${res.count} sản phẩm thành công!`);
+        this.loadProducts();
+      },
+      error: () => {
+        alert('Lỗi khi nhập file!');
+      }
+    })
+  }
+
+  // Xuất file excel
+  exportExcel(): void {
+    const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(this.products);
+    const workbook: XLSX.WorkBook = {
+      Sheets: { 'Sản phẩm': worksheet },
+      SheetNames: ['Sản phẩm']
+    };
+
+    const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+
+    const fileName = 'DanhSachSanPham.xlsx';
+    const data: Blob = new Blob([excelBuffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    });
+
+    FileSaver.saveAs(data, fileName);
   }
 }

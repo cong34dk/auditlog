@@ -1,6 +1,5 @@
 ﻿using auditlog_backend.Models;
 using auditlog_backend.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using auditlog_backend.DTOs.User;
@@ -34,10 +33,10 @@ namespace auditlog_backend.Controllers
         {
             var user = await _dbContext.Users.FirstOrDefaultAsync(x => x.Username == param.Username);
             if (user == null || !BCrypt.Net.BCrypt.Verify(param.Password, user.Password))
-                return Unauthorized(new { message = "Invalid username or password" });
+                return Ok(new { message = "Invalid username or password" , statusCode = 401});
 
             var token = _jwtService.GenerateToken(user);
-            return Ok(new { token });
+            return Ok(new { token, statusCode = 200});
         }
     }
 }

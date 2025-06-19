@@ -34,13 +34,14 @@ export class LoginComponent {
     if (!this.loginForm.valid) return;
 
     const formData = this.loginForm.value;
-    this._authService.login(formData).subscribe((res) => {
-      console.log('Login successful', res);
+    this._authService.login(formData).subscribe({
+      next: () => {
       this._router.navigate(['/list']);
-    }),
-      (err: any) => {
-        console.error('Login failed', err);
-      };
+      },
+      error: (err) => {
+        alert(err.message || 'Đăng nhập thất bại');
+      }
+    });
     this.loginForm.reset();
   }
 

@@ -27,12 +27,17 @@ export class AuthService {
   login(data: { username: string; password: string }): Observable<any> {
     return this.http.post(`${this.apiUrl}/auth/login`, data).pipe(
       tap((res: any) => {
+        if (res.statusCode != 200) {
+          throw new Error(res.message || 'Login failed');
+        }
+
         localStorage.setItem(this.tokenKey, res.token);
         const payload = this.decodeJwtPayload(res.token);
         const username = payload?.username || payload?.sub;
         this._currentUser.next(username);
         localStorage.setItem('username', username);
-      })
+      }
+      )
     );
   }
 

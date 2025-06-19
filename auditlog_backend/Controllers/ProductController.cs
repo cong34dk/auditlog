@@ -1,12 +1,14 @@
 ﻿using auditlog_backend.DTOs.Product;
 using auditlog_backend.Models;
+using EFCore.BulkExtensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using OfficeOpenXml;
+using System.Diagnostics;
 
 namespace auditlog_backend.Controllers
 {
-    [Authorize]
     [Route("api/product/[action]")]
     [ApiController]
     public class ProductController : ControllerBase
@@ -20,18 +22,21 @@ namespace auditlog_backend.Controllers
         [HttpGet]
         public async Task<IActionResult> Get(string? search, int page = 1, int pageSize = 10)
         {
-            var query = _dbContext.Products.AsQueryable();
+            var stopwatch = Stopwatch.StartNew();
+            var query = _dbContext.Products
+                .AsNoTracking()
+                .OrderByDescending(p => p.CreatedAt)
+                .AsQueryable();
 
             if (!string.IsNullOrEmpty(search))
             {
-                query = query.Where(p => p.Name.Contains(search));
+                query = query.Where(p => p.Name.ToUpper().Contains(search.ToUpper()));
             }
 
             var totalRecord = await query.CountAsync();
-            var totalPages = (int)Math.Ceiling((double)totalRecord / pageSize);
+            //var totalPages = (int)Math.Ceiling((double)totalRecord / pageSize);
 
             var products = await query
-                .OrderByDescending(p => p.CreatedAt)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .Select(p => new ProductDto
@@ -43,11 +48,15 @@ namespace auditlog_backend.Controllers
                     CreatedAt = p.CreatedAt
                 }).ToListAsync();
 
+            stopwatch.Stop();
+
             return Ok(new
             {
                 TotalRecord = totalRecord,
-                TotalPages = totalPages,
+                TotalPages = (int)Math.Ceiling((double)totalRecord / pageSize),
                 CurrentPage = page,
+                TimeInMilliseconds = stopwatch.ElapsedMilliseconds,
+                TimeFormatted = $"{stopwatch.Elapsed.TotalSeconds:N2} giây",
                 Products = products
             });
         }
@@ -160,6 +169,98 @@ namespace auditlog_backend.Controllers
             _dbContext.Products.RemoveRange(products);
             await _dbContext.SaveChangesAsync();
             return NoContent();
+        }
+
+        [HttpGet]
+        public IActionResult DownloadTemplate()
+        {
+            using (var package = new ExcelPackage())
+            {
+                var sheet = package.Workbook.Worksheets.Add("ProductTemplate");
+
+                // Tạo header
+                sheet.Cells[1, 1].Value = "Name";
+                sheet.Cells[1, 2].Value = "Price";
+                sheet.Cells[1, 3].Value = "Description";
+
+                sheet.Cells[1, 1, 1, 3].Style.Font.Bold = true;
+
+                var fileBytes = package.GetAsByteArray();
+                var fileName = "ProductTemplate.xlsx";
+                return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ImportTemplate(IFormFile file)
+        {
+            if (file == null || file.Length <= 0)
+            {
+                return BadRequest("Vui lòng chọn file Excel import hợp lệ");
+            }
+
+            var products = new List<Product>();
+
+            using var stream = new MemoryStream();
+            await file.CopyToAsync(stream);
+            using var package = new ExcelPackage(stream);
+            var worksheet = package.Workbook.Worksheets.First();
+            int rowCount = worksheet.Dimension.Rows;
+
+            for (int row = 2; row <= rowCount; row++)
+            {
+                var product = new Product
+                {
+                    Name = worksheet.Cells[row, 1].Text,
+                    Price = decimal.TryParse(worksheet.Cells[row, 2].Text, out var price) ? price : 0,
+                    Description = worksheet.Cells[row, 3].Text,
+                    CreatedAt = DateTime.Now
+                };
+                products.Add(product);
+            }
+
+            await _dbContext.BulkInsertAsync(products);
+
+            return Ok(new { Count = products.Count, Message = "Import Excel thành công" });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> GenerateFakeData(int total)
+        {
+            if (total <= 0) return BadRequest("Số lượng phải lớn hơn 0");
+
+            var stopwatch = Stopwatch.StartNew();
+            var random = new Random();
+            int batchSize = 100000;
+            var dNow = DateTime.Now;
+
+            _dbContext.ChangeTracker.AutoDetectChangesEnabled = false;
+
+            for (int i = 0; i < total; i += batchSize)
+            {
+                var batch = new List<Product>(batchSize);
+                for (int j = 0; j < batchSize && i + j < total; j++)
+                {
+                    batch.Add(new Product
+                    {
+                        Name = $"Sản phẩm {i + 1}",
+                        Price = random.Next(1, 100),
+                        Description = $"Mô tả sản phẩm {i + 1}",
+                        CreatedAt = dNow
+                    });
+                }
+                await _dbContext.BulkInsertAsync(batch);
+            }
+
+            stopwatch.Stop();
+
+            return Ok(new
+            {
+                Count = total,
+                Message = $"Đã mock data thành công {total} sản phẩm",
+                TimeInMilliseconds = stopwatch.ElapsedMilliseconds,
+                TimeFormatted = $"{stopwatch.Elapsed.TotalSeconds:N2} giây"
+            });
         }
     }
 }

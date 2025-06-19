@@ -1,5 +1,4 @@
 ﻿using auditlog_backend.DTOs.AuditLog;
-using auditlog_backend.DTOs.Product;
 using auditlog_backend.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
