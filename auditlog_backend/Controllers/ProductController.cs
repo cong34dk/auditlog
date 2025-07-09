@@ -1,4 +1,5 @@
 ﻿using auditlog_backend.DTOs.Product;
+using auditlog_backend.Helper;
 using auditlog_backend.Models;
 using EFCore.BulkExtensions;
 using Microsoft.AspNetCore.Authorization;
@@ -9,6 +10,7 @@ using System.Diagnostics;
 
 namespace auditlog_backend.Controllers
 {
+    //[Authorize]
     [Route("api/product/[action]")]
     [ApiController]
     public class ProductController : ControllerBase
@@ -69,14 +71,9 @@ namespace auditlog_backend.Controllers
             {
                 return NotFound();
             }
-            var productDto = new ProductDto
-            {
-                Id = product.Id,
-                Name = product.Name,
-                Price = product.Price,
-                Description = product.Description,
-                CreatedAt = product.CreatedAt
-            };
+
+            var productDto = HelperMapper.Map<Product, ProductDto>(product);
+
             return Ok(productDto);
         }
 
@@ -88,25 +85,14 @@ namespace auditlog_backend.Controllers
                 return BadRequest("Product data is required");
             }
 
-            var product = new Product
-            {
-                Name = param.Name,
-                Price = param.Price,
-                Description = param.Description,
-                CreatedAt = DateTime.Now
-            };
+            var product = HelperMapper.Map<CreateProductDto, Product>(param);
+            product.CreatedAt = DateTime.Now;
+
 
             _dbContext.Products.Add(product);
             await _dbContext.SaveChangesAsync();
 
-            var productDto = new ProductDto
-            {
-                Id = product.Id,
-                Name = product.Name,
-                Price = product.Price,
-                Description = product.Description,
-                CreatedAt = product.CreatedAt
-            };
+            var productDto = HelperMapper.Map<Product, ProductDto>(product);
 
             return CreatedAtAction(nameof(GetById), new { id = product.Id }, productDto);
         }
@@ -124,22 +110,14 @@ namespace auditlog_backend.Controllers
                 return BadRequest("Product data is required");
             }
 
-            obj.Name = param.Name;
-            obj.Price = param.Price;
-            obj.Description = param.Description;
-            obj.CreatedAt = DateTime.Now;
+            HelperMapper.MapToExisting(param, obj);
+            obj.CreatedAt = obj.CreatedAt == default ? DateTime.Now : obj.CreatedAt;
 
             _dbContext.Products.Update(obj);
             await _dbContext.SaveChangesAsync();
 
-            var productDto = new ProductDto
-            {
-                Id = obj.Id,
-                Name = obj.Name,
-                Price = obj.Price,
-                Description = obj.Description,
-                CreatedAt = obj.CreatedAt
-            };
+            var productDto = HelperMapper.Map<Product, ProductDto>(obj);
+
             return Ok(productDto);
         }
 

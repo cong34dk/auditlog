@@ -17,7 +17,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend",
         policy =>
         {
-            policy.WithOrigins("http://localhost:4200")
+            policy.WithOrigins("http://localhost:4200", "http://localhost:1001")
                   .AllowAnyHeader()
                   .AllowAnyMethod();
 
@@ -90,10 +90,13 @@ builder.Services.AddSwaggerGen();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.IsStaging() || app.Environment.IsProduction())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    
+    // Log bug details
+    app.UseDeveloperExceptionPage();
 }
 
 app.UseCors("AllowFrontend");
