@@ -10,13 +10,18 @@ import { Router, RouterModule, RouterOutlet } from '@angular/router';
   styleUrl: './main-layout.component.css'
 })
 export class MainLayoutComponent implements OnInit {
-  username: string | null = '';
+  fullName: string | null = '';
+  avatarUrl: string | null = '';
 
   constructor(private _authService: AuthService, private _router: Router) {}
 
   ngOnInit(): void {
-    this._authService.currentUser$.subscribe(name => {
-      this.username = name;
+    this._authService.fullName$.subscribe(name => {
+      this.fullName = name;
+    });
+
+    this._authService.avatarUrl$.subscribe(url => {
+      this.avatarUrl = url;
     });
   }
 

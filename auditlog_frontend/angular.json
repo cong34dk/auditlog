@@ -22,6 +22,11 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "input": "src",
+                "glob": "web.config",
+                "output": "."
               }
             ],
             "styles": [

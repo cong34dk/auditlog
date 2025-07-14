@@ -86,4 +86,8 @@ namespace auditlog_backend.Helper
         public List<T> Items { get; set; }
     }
 
+    public class Consts
+    {
+        public const string DefaultAvatarUrl = "https://e7.pngegg.com/pngimages/84/165/png-clipart-united-states-avatar-organization-information-user-avatar-service-computer-wallpaper-thumbnail.png";
+    }
 }

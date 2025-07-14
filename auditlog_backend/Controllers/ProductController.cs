@@ -10,7 +10,7 @@ using System.Diagnostics;
 
 namespace auditlog_backend.Controllers
 {
-    //[Authorize]
+    [Authorize]
     [Route("api/product/[action]")]
     [ApiController]
     public class ProductController : ControllerBase
@@ -221,9 +221,9 @@ namespace auditlog_backend.Controllers
                 {
                     batch.Add(new Product
                     {
-                        Name = $"Sản phẩm {i + 1}",
+                        Name = $"Sản phẩm {j + 1}",
                         Price = random.Next(1, 100),
-                        Description = $"Mô tả sản phẩm {i + 1}",
+                        Description = $"Mô tả sản phẩm {j + 1}",
                         CreatedAt = dNow
                     });
                 }

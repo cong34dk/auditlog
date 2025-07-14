@@ -10,17 +10,17 @@ export class AuthService {
   private tokenKey = 'authToken';
   private apiUrl = environment.apiUrl;
 
-  private _currentUser = new BehaviorSubject<string | null>(null);
-  currentUser$ = this._currentUser.asObservable();
+  private _fullName = new BehaviorSubject<string | null>(null);
+  fullName$ = this._fullName.asObservable();
+
+  private _avatarUrl = new BehaviorSubject<string | null>(null);
+  avatarUrl$ = this._avatarUrl.asObservable();
 
   constructor(private http: HttpClient) {
-    const token = this.getToken();
+    const token = localStorage.getItem(this.tokenKey);
     if (token) {
-      const payload = this.decodeJwtPayload(token);
-      const username = payload?.username || payload?.sub;
-      this._currentUser.next(username);
-
-      localStorage.setItem('username', username);
+      this._fullName.next(localStorage.getItem('fullName') || null);
+      this._avatarUrl.next(localStorage.getItem('avatarUrl') || null);
     }
   }
   
@@ -32,16 +32,22 @@ export class AuthService {
         }
 
         localStorage.setItem(this.tokenKey, res.token);
-        const payload = this.decodeJwtPayload(res.token);
-        const username = payload?.username || payload?.sub;
-        this._currentUser.next(username);
-        localStorage.setItem('username', username);
+
+        // Full name
+        const fullName = res.fullName || '';
+        this._fullName.next(fullName);
+        localStorage.setItem('fullName', fullName);
+
+        // Avatar
+        const avatarUrl = res.avatarUrl || '';
+        this._avatarUrl.next(avatarUrl);
+        localStorage.setItem('avatarUrl', avatarUrl);
       }
       )
     );
   }
 
-  register(data: { username: string; password: string }): Observable<any> {
+  register(data: { fullname: string, username: string; password: string }): Observable<any> {
     return this.http.post(`${this.apiUrl}/auth/register`, data);
   }
 
@@ -51,18 +57,31 @@ export class AuthService {
 
   logout() {
     localStorage.removeItem(this.tokenKey);
-    localStorage.removeItem('username');
-    this._currentUser.next(null);
+    localStorage.removeItem('fullName');
+    localStorage.removeItem('avatarUrl');
+    this._fullName.next(null);
+    this._avatarUrl.next(null);
   }
 
-  private decodeJwtPayload(token: string): any {
-    const payload = token.split('.')[1];
-    const decoded = decodeURIComponent(
-      atob(payload)
-        .split('')
-        .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-        .join('')
+  googleLogin(idToken: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/auth/googlelogin`, { idToken }).pipe(
+      tap((res: any) => {
+        if (res.statusCode != 200) {
+          throw new Error(res.message || 'Google login failed');
+        }
+
+        localStorage.setItem(this.tokenKey, res.token);
+
+        // Full name
+        const fullName = res.fullName || '';
+        this._fullName.next(fullName);
+        localStorage.setItem('fullName', fullName);
+        
+        // Avatar
+        const avatarUrl = res.avatarUrl || '';
+        this._avatarUrl.next(avatarUrl);
+        localStorage.setItem('avatarUrl', avatarUrl);
+      })
     );
-    return JSON.parse(decoded);
   }
 }

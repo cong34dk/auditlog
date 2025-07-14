@@ -25,6 +25,7 @@ export class RegisterComponent {
     private _router: Router
   ) {
     this.registerForm = this._formBuilder.group({
+      fullname: ['', Validators.required],
       username: ['', Validators.required],
       password: ['', Validators.required],
       confirmPassword: ['', Validators.required],
@@ -41,8 +42,8 @@ export class RegisterComponent {
   onSubmit() {
     if (!this.registerForm.valid) return;
 
-    const { username, password } = this.registerForm.value;
-    const payload = { username, password };
+    const { fullname, username, password } = this.registerForm.value;
+    const payload = { fullname, username, password };
     this._authService.register(payload).subscribe(
       (res) => {
         console.log('Registration successful', res);

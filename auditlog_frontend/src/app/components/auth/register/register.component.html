@@ -2,6 +2,14 @@
   <h3 class="mb-4">Đăng ký</h3>
   <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
     <div class="mb-3">
+      <label for="fullname" class="form-label">Họ và tên</label>
+      <input type="text" class="form-control" id="fullname" formControlName="fullname">
+      <div class="text-danger mt-1" *ngIf="registerForm.get('fullname')?.touched && registerForm.get('fullname')?.invalid">
+        Họ và tên là bắt buộc
+      </div>
+    </div>
+
+    <div class="mb-3">
       <label for="username" class="form-label">Tên đăng nhập</label>
       <input type="text" class="form-control" id="username" formControlName="username">
       <div class="text-danger mt-1" *ngIf="registerForm.get('username')?.touched && registerForm.get('username')?.invalid">
