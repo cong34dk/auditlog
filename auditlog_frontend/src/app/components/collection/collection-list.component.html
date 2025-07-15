@@ -1,0 +1,53 @@
+<h3>Bộ sưu tập</h3>
+
+<div class="d-flex justify-content-between mb-3 align-items-center">
+  <input type="file" accept="image/*" (change)="onFileChange($event)" />
+  <img *ngIf="previewUrl" [src]="previewUrl" alt="Preview" class="img-thumbnail" style="max-width: 100px; max-height: 100px;" />
+  <br />
+  <button class="btn btn-success" (click)="uploadFile()">Tải lên</button>
+
+  <div class="d-flex align-items-center gap-2">
+    <label for="pageSizeSelect" class="form-label mb-0 me-2">Hiển thị:</label>
+    <select class="form-select w-auto" id="pageSizeSelect" [(ngModel)]="pageSize" (change)="onPageSizeChange()">
+      <option [value]="5">5</option>
+      <option [value]="10">10</option>
+      <option [value]="20">20</option>
+      <option [value]="50">50</option>
+    </select>
+
+    <input type="text" class="form-control d-inline-block w-auto me-2" placeholder="Tìm kiếm..." [(ngModel)]="searchTerm" (keyup.enter)="onSearch()" />
+    <button class="btn btn-primary" (click)="onSearch()">Tìm</button>
+  </div>
+</div>
+
+<div style="max-height: 650px; overflow-y: auto; overflow-x: hidden;">
+  <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3">
+    <div class="col" *ngFor="let item of collections">
+      <div class="card h-100 shadow-sm">
+        <img [src]="item.imgUrl" class="card-img-top" alt="Ảnh" style="height: 280px; object-fit: cover;" />
+        <div class="card-body p-2">
+          <p class="card-text text-muted mb-0" style="font-size: 0.8rem;">Ngày tạo: {{ item.createdAt | date:'short' }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+  <p class="text-end">Tổng số bản ghi: {{ totalRecord }}</p>
+
+  <nav>
+    <ul class="pagination justify-content-center">
+      <li class="page-item" [class.disabled]="currentPage === 1">
+        <a class="page-link" (click)="changePage(currentPage - 1)">Trước</a>
+      </li>
+
+      <li class="page-item" *ngFor="let page of getPageNumbers()" [class.active]="page === currentPage">
+        <a class="page-link" (click)="changePage(page)">{{ page }}</a>
+      </li>
+
+      <li class="page-item" [class.disabled]="currentPage === totalPages">
+        <a class="page-link" (click)="changePage(currentPage + 1)">Sau</a>
+      </li>
+    </ul>
+  </nav>

@@ -6,6 +6,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import * as XLSX from 'xlsx';
 import * as FileSaver from 'file-saver';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-product-list',
@@ -25,7 +26,7 @@ export class ProductListComponent implements OnInit {
   
   selectedFile: File | null = null;
   
-  constructor(private _productService: ProductService, private _router: Router) {}
+  constructor(private _productService: ProductService, private _router: Router, private _notification: ToastrService) {}
 
   ngOnInit(): void {
     this.loadProducts();
@@ -101,11 +102,11 @@ export class ProductListComponent implements OnInit {
 
     this._productService.importTemplate(formData).subscribe({
       next: (res: any) => {
-        alert(`Đã nhập ${res.count} sản phẩm thành công!`);
+        this._notification.success(`Đã nhập ${res.count} sản phẩm thành công!`, 'Thành công');
         this.loadProducts();
       },
       error: () => {
-        alert('Lỗi khi nhập file!');
+        this._notification.error('Lỗi khi nhập file!', 'Lỗi');
       }
     })
   }
